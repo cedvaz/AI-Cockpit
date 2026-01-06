@@ -1,19 +1,19 @@
 
 import React from 'react';
 import { Search, Filter, ArrowUpRight, ChevronRight, Briefcase } from 'lucide-react';
-import { Deal, Account } from '../types.ts';
+import { Deal, Company } from '../types.ts';
 
 interface DealsListProps {
   deals: Deal[];
-  accounts: Account[];
+  companies: Company[];
   onSelectDeal: (id: string) => void;
   searchTerm: string;
 }
 
-const DealsList: React.FC<DealsListProps> = ({ deals, accounts, onSelectDeal, searchTerm }) => {
+const DealsList: React.FC<DealsListProps> = ({ deals, companies, onSelectDeal, searchTerm }) => {
   const filteredDeals = deals.filter(deal => {
-    const account = accounts.find(a => a.id === deal.accountId);
-    const searchString = `${deal.name} ${account?.name} ${deal.stage}`.toLowerCase();
+    const company = companies.find(c => c.id === deal.companyId);
+    const searchString = `${deal.title} ${company?.name} ${deal.stage}`.toLowerCase();
     return searchString.includes(searchTerm.toLowerCase());
   });
 
@@ -36,7 +36,7 @@ const DealsList: React.FC<DealsListProps> = ({ deals, accounts, onSelectDeal, se
           <thead>
             <tr className="bg-slate-50 text-slate-500 text-[10px] uppercase tracking-wider">
               <th className="px-6 py-4 font-semibold">Deal Name</th>
-              <th className="px-6 py-4 font-semibold">Account</th>
+              <th className="px-6 py-4 font-semibold">Firma</th>
               <th className="px-6 py-4 font-semibold">Stage</th>
               <th className="px-6 py-4 font-semibold text-right">Value</th>
               <th className="px-6 py-4 font-semibold">Next Step</th>
@@ -45,10 +45,10 @@ const DealsList: React.FC<DealsListProps> = ({ deals, accounts, onSelectDeal, se
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filteredDeals.length > 0 ? filteredDeals.map(deal => {
-              const account = accounts.find(a => a.id === deal.accountId);
+              const company = companies.find(c => c.id === deal.companyId);
               return (
-                <tr 
-                  key={deal.id} 
+                <tr
+                  key={deal.id}
                   className="hover:bg-slate-50 transition-colors group cursor-pointer"
                   onClick={() => onSelectDeal(deal.id)}
                 >
@@ -57,18 +57,17 @@ const DealsList: React.FC<DealsListProps> = ({ deals, accounts, onSelectDeal, se
                       <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
                         <Briefcase size={16} />
                       </div>
-                      <p className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{deal.name}</p>
+                      <p className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{deal.title}</p>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-sm text-slate-600">{account?.name || 'Unbekannt'}</p>
+                    <p className="text-sm text-slate-600">{company?.name || 'Unbekannt'}</p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      deal.stage.includes('Won') ? 'bg-emerald-50 text-emerald-700' :
-                      deal.stage.includes('Lost') ? 'bg-slate-100 text-slate-500' :
-                      'bg-indigo-50 text-indigo-700'
-                    }`}>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${deal.stage.includes('Won') ? 'bg-emerald-50 text-emerald-700' :
+                        deal.stage.includes('Lost') ? 'bg-slate-100 text-slate-500' :
+                          'bg-indigo-50 text-indigo-700'
+                      }`}>
                       {deal.stage}
                     </span>
                   </td>
@@ -100,3 +99,4 @@ const DealsList: React.FC<DealsListProps> = ({ deals, accounts, onSelectDeal, se
 };
 
 export default DealsList;
+

@@ -52,12 +52,24 @@ export interface Message {
   tags?: string[];
 }
 
-export interface Account {
+// Renamed from Account to Company
+export interface Company {
   id: string;
   name: string;
   domain: string;
   industry: string;
   size: string;
+  notes: string;
+}
+
+// New Contact interface
+export interface Contact {
+  id: string;
+  companyId: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
   notes: string;
 }
 
@@ -85,8 +97,9 @@ export interface Interaction {
 
 export interface Deal {
   id: string;
-  accountId: string;
-  name: string;
+  companyId: string;
+  primaryContactId: string;
+  title: string;
   stage: DealStage;
   ownerId: string;
   value?: number;
@@ -94,3 +107,5 @@ export interface Deal {
   tags: string[];
   score: number;
 }
+
+

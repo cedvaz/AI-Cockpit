@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Deal, Account, Interaction, Message, TaskType, TaskPriority } from '../types.ts';
+import { Deal, Company, Interaction, Message, TaskType, TaskPriority } from '../types.ts';
 
 // Initializing the AI client with the environment key
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
@@ -43,7 +43,7 @@ export const enrichLeadAI = async (input: string) => {
   return JSON.parse(response.text || '{}');
 };
 
-export const analyzeMessageAI = async (message: Message, deal?: Deal, account?: Account) => {
+export const analyzeMessageAI = async (message: Message, deal?: Deal, company?: Company) => {
   const prompt = `
     ACT AS AN EXECUTIVE ASSISTANT.
     Analyze this email and provide intelligence.
@@ -51,7 +51,7 @@ export const analyzeMessageAI = async (message: Message, deal?: Deal, account?: 
     Sender: ${message.sender}
     Subject: ${message.subject}
     Body: ${message.body}
-    Context: ${deal ? `Associated with Deal: ${deal.name} for ${account?.name}` : 'No specific deal context'}
+    Context: ${deal ? `Associated with Deal: ${deal.title} for ${company?.name}` : 'No specific deal context'}
 
     Task:
     1. Write a high-quality "Response Draft" (German).
@@ -93,13 +93,13 @@ export const analyzeMessageAI = async (message: Message, deal?: Deal, account?: 
   return JSON.parse(response.text || '{}');
 };
 
-export const prepareCallAI = async (deal: Deal, account: Account, interactions: Interaction[], depth: 'Quick' | 'Standard' | 'Deep') => {
+export const prepareCallAI = async (deal: Deal, company: Company, interactions: Interaction[], depth: 'Quick' | 'Standard' | 'Deep') => {
   const prompt = `
     ACT AS A WORLD-CLASS SALES ENGINEER.
     Task: Prepare an ultra-high-performance sales briefing for a high-ticket AI deal.
     Context:
-    - Company: ${account.name} (Industry: ${account.industry}, Domain: ${account.domain})
-    - Deal: ${deal.name} (Current Stage: ${deal.stage})
+    - Company: ${company.name} (Industry: ${company.industry}, Domain: ${company.domain})
+    - Deal: ${deal.title} (Current Stage: ${deal.stage})
     - History: ${interactions.map(i => i.content).join(' | ')}
     - Analysis Depth: ${depth}
 
@@ -141,11 +141,11 @@ export const prepareCallAI = async (deal: Deal, account: Account, interactions: 
   return JSON.parse(response.text || '{}');
 };
 
-export const generateOutreachAI = async (deal: Deal, account: Account, tone: string) => {
+export const generateOutreachAI = async (deal: Deal, company: Company, tone: string) => {
   const prompt = `
     Generate a highly personalized LinkedIn outreach message.
-    Target: Decision maker at ${account.name}.
-    Topic: ${deal.name}.
+    Target: Decision maker at ${company.name}.
+    Topic: ${deal.title}.
     Tone: ${tone}.
     Style: No fluff. Max 3 sentences.
   `;
@@ -165,3 +165,4 @@ export const generateOutreachAI = async (deal: Deal, account: Account, tone: str
   });
   return JSON.parse(response.text || '{}');
 };
+

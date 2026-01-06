@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
-import { 
-  ArrowLeft, 
-  Zap, 
-  FilePlus, 
-  Clock, 
-  CheckCircle2, 
+import {
+  ArrowLeft,
+  Zap,
+  FilePlus,
+  Clock,
+  CheckCircle2,
   MoreVertical,
   RefreshCcw,
   Lock,
@@ -20,11 +20,11 @@ import {
   Linkedin,
   Mail
 } from 'lucide-react';
-import { Deal, Account, Interaction, Task, InteractionType } from '../types.ts';
+import { Deal, Company, Interaction, Task, InteractionType } from '../types.ts';
 
 interface DealWorkspaceProps {
   deal: Deal;
-  account: Account;
+  company: Company;
   interactions: Interaction[];
   tasks: Task[];
   onBack: () => void;
@@ -32,7 +32,7 @@ interface DealWorkspaceProps {
   onCreateOffer: () => void;
 }
 
-const DealWorkspace: React.FC<DealWorkspaceProps> = ({ deal, account, interactions, tasks, onBack, onPrepareCall, onCreateOffer }) => {
+const DealWorkspace: React.FC<DealWorkspaceProps> = ({ deal, company, interactions, tasks, onBack, onPrepareCall, onCreateOffer }) => {
   const [activeSection, setActiveSection] = useState<'timeline' | 'research' | 'outreach' | 'tasks' | 'files'>('timeline');
 
   return (
@@ -45,21 +45,21 @@ const DealWorkspace: React.FC<DealWorkspaceProps> = ({ deal, account, interactio
           </button>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{account.name}</span>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{company.name}</span>
               <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
               <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em]">{deal.tags[0]}</span>
             </div>
-            <h2 className="text-3xl font-black text-slate-900 truncate tracking-tight">{deal.name}</h2>
+            <h2 className="text-3xl font-black text-slate-900 truncate tracking-tight">{deal.title}</h2>
           </div>
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={onPrepareCall}
               className="flex items-center gap-2 px-6 py-3.5 bg-indigo-600 text-white font-black rounded-[1.5rem] hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200"
             >
               <Zap size={20} fill="white" />
               <span>Prepare Call</span>
             </button>
-            <button 
+            <button
               onClick={onCreateOffer}
               className="flex items-center gap-2 px-6 py-3.5 bg-slate-900 text-white font-black rounded-[1.5rem] hover:bg-slate-800 transition-all shadow-xl shadow-slate-300"
             >
@@ -122,29 +122,28 @@ const DealWorkspace: React.FC<DealWorkspaceProps> = ({ deal, account, interactio
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">Activity Stream</h3>
                 <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
-                   <button className="text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg bg-white shadow-sm text-indigo-600">All</button>
-                   <button className="text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg text-slate-400 hover:text-slate-600">Sales</button>
+                  <button className="text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg bg-white shadow-sm text-indigo-600">All</button>
+                  <button className="text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg text-slate-400 hover:text-slate-600">Sales</button>
                 </div>
               </div>
-              
+
               <div className="space-y-8 relative before:absolute before:left-[19px] before:top-4 before:bottom-4 before:w-1 before:bg-slate-100 before:rounded-full">
                 {interactions.map((interaction) => (
                   <div key={interaction.id} className="relative pl-14 group">
-                    <div className={`absolute left-0 top-1 w-10 h-10 rounded-2xl flex items-center justify-center border-4 border-white z-10 transition-all group-hover:scale-110 shadow-sm ${
-                      interaction.type === InteractionType.SYSTEM ? 'bg-slate-900 text-white' : 
-                      interaction.type === InteractionType.RESEARCH ? 'bg-indigo-600 text-white' :
-                      'bg-indigo-100 text-indigo-600'
-                    }`}>
-                      {interaction.type === InteractionType.SYSTEM ? <Zap size={16} /> : 
-                       interaction.type === InteractionType.RESEARCH ? <Zap size={16} fill="white" /> :
-                       <CheckCircle2 size={16} />}
+                    <div className={`absolute left-0 top-1 w-10 h-10 rounded-2xl flex items-center justify-center border-4 border-white z-10 transition-all group-hover:scale-110 shadow-sm ${interaction.type === InteractionType.SYSTEM ? 'bg-slate-900 text-white' :
+                        interaction.type === InteractionType.RESEARCH ? 'bg-indigo-600 text-white' :
+                          'bg-indigo-100 text-indigo-600'
+                      }`}>
+                      {interaction.type === InteractionType.SYSTEM ? <Zap size={16} /> :
+                        interaction.type === InteractionType.RESEARCH ? <Zap size={16} fill="white" /> :
+                          <CheckCircle2 size={16} />}
                     </div>
                     <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-lg hover:bg-white transition-all">
                       <div className="flex justify-between items-start mb-3">
-                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                           {new Date(interaction.timestamp).toLocaleString()}
-                         </span>
-                         <button className="text-slate-300 hover:text-slate-600"><MoreVertical size={18} /></button>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                          {new Date(interaction.timestamp).toLocaleString()}
+                        </span>
+                        <button className="text-slate-300 hover:text-slate-600"><MoreVertical size={18} /></button>
                       </div>
                       <p className="text-sm font-semibold text-slate-700 leading-relaxed">{interaction.content}</p>
                     </div>
@@ -156,54 +155,54 @@ const DealWorkspace: React.FC<DealWorkspaceProps> = ({ deal, account, interactio
 
           {activeSection === 'outreach' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-               <div className="bg-indigo-600 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
-                 <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10">
-                   <div className="space-y-6">
-                      <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                        <Send size={28} />
-                      </div>
-                      <h3 className="text-3xl font-black leading-tight">AI Outreach Generator</h3>
-                      <p className="text-indigo-100/70 font-medium">Lass die KI basierend auf dem Research Memo die perfekte Nachricht für {account.name} schreiben.</p>
-                      <div className="flex gap-3">
-                        <button className="flex-1 bg-white text-indigo-600 font-black py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-indigo-50 transition-all">
-                          <Linkedin size={18} /> LinkedIn Msg
-                        </button>
-                        <button className="flex-1 bg-indigo-500 text-white font-black py-4 rounded-2xl border border-indigo-400/30 flex items-center justify-center gap-2 hover:bg-indigo-400 transition-all">
-                          <Mail size={18} /> Cold Email
-                        </button>
-                      </div>
-                   </div>
-                   <div className="bg-black/20 rounded-[2rem] p-6 backdrop-blur-sm border border-white/10 font-mono text-xs leading-relaxed text-indigo-100">
-                      <div className="flex justify-between items-center mb-4 pb-4 border-b border-white/10">
-                        <span className="uppercase tracking-widest font-black text-[10px]">Preview: LinkedIn Hook</span>
-                        <Copy size={14} className="cursor-pointer hover:text-white" />
-                      </div>
-                      "Hi [Name], habe gesehen dass ihr bei {account.name} gerade massiv in Supply Chain Tech investiert. Unser KI-Audit für VW hat dort 12% Opex gespart – hättest du 5 Min für einen kurzen Impuls?"
-                   </div>
-                 </div>
-               </div>
+              <div className="bg-indigo-600 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
+                <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="space-y-6">
+                    <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                      <Send size={28} />
+                    </div>
+                    <h3 className="text-3xl font-black leading-tight">AI Outreach Generator</h3>
+                    <p className="text-indigo-100/70 font-medium">Lass die KI basierend auf dem Research Memo die perfekte Nachricht für {company.name} schreiben.</p>
+                    <div className="flex gap-3">
+                      <button className="flex-1 bg-white text-indigo-600 font-black py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-indigo-50 transition-all">
+                        <Linkedin size={18} /> LinkedIn Msg
+                      </button>
+                      <button className="flex-1 bg-indigo-500 text-white font-black py-4 rounded-2xl border border-indigo-400/30 flex items-center justify-center gap-2 hover:bg-indigo-400 transition-all">
+                        <Mail size={18} /> Cold Email
+                      </button>
+                    </div>
+                  </div>
+                  <div className="bg-black/20 rounded-[2rem] p-6 backdrop-blur-sm border border-white/10 font-mono text-xs leading-relaxed text-indigo-100">
+                    <div className="flex justify-between items-center mb-4 pb-4 border-b border-white/10">
+                      <span className="uppercase tracking-widest font-black text-[10px]">Preview: LinkedIn Hook</span>
+                      <Copy size={14} className="cursor-pointer hover:text-white" />
+                    </div>
+                    "Hi [Name], habe gesehen dass ihr bei {company.name} gerade massiv in Supply Chain Tech investiert. Unser KI-Audit für VW hat dort 12% Opex gespart – hättest du 5 Min für einen kurzen Impuls?"
+                  </div>
+                </div>
+              </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 <div className="bg-white p-6 rounded-[2rem] border border-slate-200">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Tone of Voice</h4>
-                    <select className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 font-bold text-sm outline-none ring-1 ring-slate-200 focus:ring-indigo-600 transition-all">
-                      <option>Bold & Direct</option>
-                      <option>Professional & Data-driven</option>
-                      <option>Casual & Friendly</option>
-                    </select>
-                 </div>
-                 <div className="bg-white p-6 rounded-[2rem] border border-slate-200">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Main Trigger</h4>
-                    <select className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 font-bold text-sm outline-none ring-1 ring-slate-200 focus:ring-indigo-600 transition-all">
-                      <option>Recent Funding</option>
-                      <option>New Role Hire</option>
-                      <option>Market Trend</option>
-                    </select>
-                 </div>
-                 <button className="bg-slate-900 text-white font-black rounded-[2rem] flex items-center justify-center gap-2 hover:bg-slate-800 transition-all">
-                   <RefreshCcw size={18} /> Regenerate All
-                 </button>
-               </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-[2rem] border border-slate-200">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Tone of Voice</h4>
+                  <select className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 font-bold text-sm outline-none ring-1 ring-slate-200 focus:ring-indigo-600 transition-all">
+                    <option>Bold & Direct</option>
+                    <option>Professional & Data-driven</option>
+                    <option>Casual & Friendly</option>
+                  </select>
+                </div>
+                <div className="bg-white p-6 rounded-[2rem] border border-slate-200">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Main Trigger</h4>
+                  <select className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 font-bold text-sm outline-none ring-1 ring-slate-200 focus:ring-indigo-600 transition-all">
+                    <option>Recent Funding</option>
+                    <option>New Role Hire</option>
+                    <option>Market Trend</option>
+                  </select>
+                </div>
+                <button className="bg-slate-900 text-white font-black rounded-[2rem] flex items-center justify-center gap-2 hover:bg-slate-800 transition-all">
+                  <RefreshCcw size={18} /> Regenerate All
+                </button>
+              </div>
             </div>
           )}
 
@@ -258,7 +257,7 @@ const DealWorkspace: React.FC<DealWorkspaceProps> = ({ deal, account, interactio
                     </ul>
                   </section>
                 </div>
-                
+
                 {/* Decorative background circle */}
                 <div className="absolute -top-20 -right-20 w-64 h-64 bg-indigo-50/30 rounded-full blur-3xl -z-10 group-hover:bg-indigo-100/40 transition-colors"></div>
               </div>
@@ -266,38 +265,38 @@ const DealWorkspace: React.FC<DealWorkspaceProps> = ({ deal, account, interactio
           )}
 
           {activeSection === 'tasks' && (
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {(['To-Do', 'Doing', 'Done'] as const).map(status => (
-                  <div key={status} className="space-y-6">
-                    <div className="flex items-center justify-between px-3">
-                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{status}</h4>
-                      <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
-                        {tasks.filter(t => t.status === status).length}
-                      </span>
-                    </div>
-                    <div className="space-y-4">
-                      {tasks.filter(t => t.status === status).map(task => (
-                        <div key={task.id} className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
-                          {task.isBlocker && (
-                             <div className="mb-3 flex items-center gap-1.5 text-[10px] font-black text-rose-500 uppercase tracking-[0.1em]">
-                               <AlertTriangle size={12} />
-                               Blocker
-                             </div>
-                          )}
-                          <h5 className="font-bold text-slate-900 text-sm mb-4 leading-snug">{task.title}</h5>
-                          <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                             <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] font-black text-indigo-600 border border-white">CH</div>
-                             <span className="text-[10px] font-black text-slate-400 uppercase">{new Date(task.dueDate).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
-                          </div>
-                        </div>
-                      ))}
-                      <button className="w-full py-5 rounded-[2rem] border-2 border-dashed border-slate-100 text-slate-400 text-xs font-black uppercase tracking-widest hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center justify-center gap-2">
-                        <Plus size={18} /> Add Action
-                      </button>
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {(['To-Do', 'Doing', 'Done'] as const).map(status => (
+                <div key={status} className="space-y-6">
+                  <div className="flex items-center justify-between px-3">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{status}</h4>
+                    <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
+                      {tasks.filter(t => t.status === status).length}
+                    </span>
                   </div>
-                ))}
-             </div>
+                  <div className="space-y-4">
+                    {tasks.filter(t => t.status === status).map(task => (
+                      <div key={task.id} className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
+                        {task.isBlocker && (
+                          <div className="mb-3 flex items-center gap-1.5 text-[10px] font-black text-rose-500 uppercase tracking-[0.1em]">
+                            <AlertTriangle size={12} />
+                            Blocker
+                          </div>
+                        )}
+                        <h5 className="font-bold text-slate-900 text-sm mb-4 leading-snug">{task.title}</h5>
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                          <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] font-black text-indigo-600 border border-white">CH</div>
+                          <span className="text-[10px] font-black text-slate-400 uppercase">{new Date(task.dueDate).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                        </div>
+                      </div>
+                    ))}
+                    <button className="w-full py-5 rounded-[2rem] border-2 border-dashed border-slate-100 text-slate-400 text-xs font-black uppercase tracking-widest hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center justify-center gap-2">
+                      <Plus size={18} /> Add Action
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
 
           {activeSection === 'files' && (
@@ -322,3 +321,4 @@ const DealWorkspace: React.FC<DealWorkspaceProps> = ({ deal, account, interactio
 };
 
 export default DealWorkspace;
+

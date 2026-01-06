@@ -3,15 +3,17 @@ import React, { useState, useMemo } from 'react';
 import Layout from './components/Layout.tsx';
 import Dashboard from './components/Dashboard.tsx';
 import DealsList from './components/DealsList.tsx';
-import LeadsList from './components/LeadsList.tsx';
 import TasksManager from './components/TasksManager.tsx';
 import CommunicationHub from './components/CommunicationHub.tsx';
 import PowerHour from './components/PowerHour.tsx';
 import DealWorkspace from './components/DealWorkspace.tsx';
 import PrepareCallModal from './components/PrepareCallModal.tsx';
-import NewLeadModal from './components/NewLeadModal.tsx';
-import { mockDeals, mockTasks, mockInteractions, mockAccounts, mockMailboxes, mockMessages } from './mockData.ts';
-import { Deal, Account, Task, Interaction, InteractionType, DealStage, Mailbox, Message } from './types.ts';
+import CompanyList from './components/CompanyList.tsx';
+import ContactList from './components/ContactList.tsx';
+import QuickAddModal from './components/QuickAddModal.tsx';
+import ImportModal from './components/ImportModal.tsx';
+import { mockDeals, mockTasks, mockInteractions, mockCompanies, mockContacts, mockMailboxes, mockMessages } from './mockData.ts';
+import { Deal, Company, Contact, Task, Interaction, DealStage, Mailbox, Message } from './types.ts';
 import { prepareCallAI } from './services/geminiService.ts';
 
 const App: React.FC = () => {
@@ -19,25 +21,28 @@ const App: React.FC = () => {
   const [deals, setDeals] = useState<Deal[]>(mockDeals);
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [interactions, setInteractions] = useState<Interaction[]>(mockInteractions);
-  const [accounts, setAccounts] = useState<Account[]>(mockAccounts);
+  const [companies, setCompanies] = useState<Company[]>(mockCompanies);
+  const [contacts, setContacts] = useState<Contact[]>(mockContacts);
   const [mailboxes] = useState<Mailbox[]>(mockMailboxes);
   const [messages, setMessages] = useState<Message[]>(mockMessages);
-  
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'leads' | 'deals' | 'tasks' | 'communication' | 'settings'>('dashboard');
+
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'companies' | 'contacts' | 'deals' | 'tasks' | 'communication' | 'settings'>('dashboard');
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [isPrepareCallOpen, setIsPrepareCallOpen] = useState(false);
-  const [isNewLeadModalOpen, setIsNewLeadModalOpen] = useState(false);
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [quickAddInitialData, setQuickAddInitialData] = useState<{ type?: 'company' | 'contact' | 'deal', companyId?: string, contactId?: string }>({});
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isPowerHourOpen, setIsPowerHourOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Derived state
   const selectedDeal = useMemo(() => deals.find(d => d.id === selectedDealId), [deals, selectedDealId]);
-  const selectedAccount = useMemo(() => accounts.find(a => a.id === selectedDeal?.accountId), [accounts, selectedDeal]);
+  const selectedCompany = useMemo(() => companies.find(c => c.id === selectedDeal?.companyId), [companies, selectedDeal]);
   const dealInteractions = useMemo(() => interactions.filter(i => i.dealId === selectedDealId), [interactions, selectedDealId]);
   const dealTasks = useMemo(() => tasks.filter(t => t.dealId === selectedDealId), [tasks, selectedDealId]);
 
-  const allLeads = useMemo(() => deals.filter(d => d.stage === DealStage.LEAD), [deals]);
-  const activePipeline = useMemo(() => deals.filter(d => d.stage !== DealStage.LEAD), [deals]);
+  const activePipeline = useMemo(() => deals, [deals]);
 
   const hotLeads = useMemo(() => deals.filter(d => d.score >= 80), [deals]);
   const upcomingCalls = useMemo(() => {
@@ -48,19 +53,68 @@ const App: React.FC = () => {
   const openOffers = useMemo(() => deals.filter(d => d.stage === DealStage.OFFER_SENT), [deals]);
   const blockers = useMemo(() => tasks.filter(t => t.isBlocker), [tasks]);
 
-  // Handlers
+  // Company Handlers
+  const handleAddCompany = (companyData: Omit<Company, 'id'>) => {
+    const newCompany: Company = {
+      ...companyData,
+      id: `comp-${Date.now()}`
+    };
+    setCompanies(prev => [newCompany, ...prev]);
+  };
+
+  const handleDeleteCompany = (id: string) => {
+    setCompanies(prev => prev.filter(c => c.id !== id));
+    setContacts(prev => prev.filter(c => c.companyId !== id));
+    setDeals(prev => prev.filter(d => d.companyId !== id));
+    if (selectedCompanyId === id) setSelectedCompanyId(null);
+  };
+
+  const handleUpdateCompany = (id: string, updates: Partial<Company>) => {
+    setCompanies(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+  };
+
+  // Contact Handlers
+  const handleAddContact = (contactData: Omit<Contact, 'id'>) => {
+    const newContact: Contact = {
+      ...contactData,
+      id: `contact-${Date.now()}`
+    };
+    setContacts(prev => [newContact, ...prev]);
+  };
+
+  const handleDeleteContact = (id: string) => {
+    setContacts(prev => prev.filter(c => c.id !== id));
+  };
+
+  const handleUpdateContact = (id: string, updates: Partial<Contact>) => {
+    setContacts(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+  };
+
+  // Deal Handlers
+  const handleAddDeal = (dealData: { companyId: string; primaryContactId: string; title: string; value?: number; }) => {
+    const newDeal: Deal = {
+      id: `deal-${Date.now()}`,
+      companyId: dealData.companyId,
+      primaryContactId: dealData.primaryContactId,
+      title: dealData.title,
+      stage: DealStage.LEAD,
+      ownerId: 'cedric',
+      value: dealData.value,
+      nextStepDate: new Date().toISOString(),
+      tags: [],
+      score: 85
+    };
+    setDeals(prev => [newDeal, ...prev]);
+    setActiveTab('deals');
+  };
+
   const handleSelectDeal = (id: string) => {
     setSelectedDealId(id);
-    const deal = deals.find(d => d.id === id);
-    if (deal?.stage === DealStage.LEAD) {
-      setActiveTab('leads');
-    } else {
-      setActiveTab('deals');
-    }
+    setActiveTab('deals');
   };
 
   const handleToggleTask = (taskId: string) => {
-    setTasks(prev => prev.map(t => 
+    setTasks(prev => prev.map(t =>
       t.id === taskId ? { ...t, status: t.status === 'Done' ? 'To-Do' : 'Done' } : t
     ));
   };
@@ -96,110 +150,99 @@ const App: React.FC = () => {
     setMessages(prev => [newMessage, ...prev]);
   };
 
-  const handleNewLeadSubmit = (data: any) => {
-    let accountId = data.accountId;
-
-    if (accountId === 'new') {
-      const newAcc: Account = {
-        id: `acc-${Date.now()}`,
-        name: data.accountData.name || 'Unknown Company',
-        domain: data.accountData.domain || '',
-        industry: data.accountData.industry || 'TBD',
-        size: 'N/A',
-        notes: `Kontakt: ${data.personName} | Tel: ${data.phone} | E-Mail: ${data.email}`
-      };
-      setAccounts(prev => [...prev, newAcc]);
-      accountId = newAcc.id;
-    }
-
-    const newDeal: Deal = {
-      id: `deal-${Date.now()}`,
-      accountId: accountId,
-      name: data.personName || data.name,
-      stage: DealStage.LEAD,
-      ownerId: 'cedric',
-      value: data.value,
-      nextStepDate: new Date().toISOString(),
-      tags: data.tags,
-      score: 85
-    };
-    
-    setDeals(prev => [newDeal, ...prev]);
-    setIsNewLeadModalOpen(false);
-    handleSelectDeal(newDeal.id);
-  };
-
   const handlePrepareCallGenerate = async (depth: 'Quick' | 'Standard' | 'Deep') => {
-    if (!selectedDeal || !selectedAccount) return null;
-    const result = await prepareCallAI(selectedDeal, selectedAccount, dealInteractions, depth);
+    if (!selectedDeal || !selectedCompany) return null;
+    const result = await prepareCallAI(selectedDeal, selectedCompany, dealInteractions, depth);
     return result;
   };
 
+  const handleBatchImport = (newCompanies: Company[], newContacts: Contact[]) => {
+    setCompanies(prev => [...newCompanies, ...prev]);
+    setContacts(prev => [...newContacts, ...prev]);
+  };
+
   return (
-    <Layout 
-      onSearch={setSearchTerm} 
-      onNewLead={() => setIsNewLeadModalOpen(true)}
-      activeTab={activeTab} 
+    <Layout
+      onSearch={setSearchTerm}
+      onQuickAdd={() => {
+        setQuickAddInitialData({});
+        setIsQuickAddOpen(true);
+      }}
+      onImport={() => setIsImportModalOpen(true)}
+      activeTab={activeTab}
       setActiveTab={setActiveTab}
     >
       {activeTab === 'dashboard' && (
-        <Dashboard 
-          hotLeads={hotLeads} 
-          upcomingCalls={upcomingCalls} 
-          openOffers={openOffers} 
-          blockers={blockers} 
-          onSelectDeal={handleSelectDeal} 
+        <Dashboard
+          hotLeads={hotLeads}
+          upcomingCalls={upcomingCalls}
+          openOffers={openOffers}
+          blockers={blockers}
+          onSelectDeal={handleSelectDeal}
         />
       )}
 
-      {activeTab === 'leads' && (
-        selectedDeal && selectedAccount && selectedDeal.stage === DealStage.LEAD ? (
-          <DealWorkspace 
-            deal={selectedDeal} 
-            account={selectedAccount} 
-            interactions={dealInteractions} 
-            tasks={dealTasks}
-            onBack={() => setSelectedDealId(null)}
-            onPrepareCall={() => setIsPrepareCallOpen(true)}
-            onCreateOffer={() => alert('Angebotserstellung...')}
-          />
-        ) : (
-          <LeadsList 
-            leads={allLeads} 
-            accounts={accounts} 
-            onSelectLead={handleSelectDeal} 
-            searchTerm={searchTerm}
-          />
-        )
+      {activeTab === 'companies' && (
+        <CompanyList
+          companies={companies}
+          contacts={contacts}
+          onAddCompany={handleAddCompany}
+          onDeleteCompany={handleDeleteCompany}
+          onUpdateCompany={handleUpdateCompany}
+          onSelectCompany={(id) => {
+            setSelectedCompanyId(id);
+            setActiveTab('contacts');
+          }}
+          onCreateDeal={(companyId) => {
+            setQuickAddInitialData({ type: 'deal', companyId });
+            setIsQuickAddOpen(true);
+          }}
+          selectedCompanyId={selectedCompanyId}
+        />
+      )}
+
+      {activeTab === 'contacts' && (
+        <ContactList
+          contacts={contacts}
+          companies={companies}
+          selectedCompanyId={selectedCompanyId}
+          onAddContact={handleAddContact}
+          onUpdateContact={handleUpdateContact}
+          onDeleteContact={handleDeleteContact}
+          onCreateDeal={(contactId, companyId) => {
+            setQuickAddInitialData({ type: 'deal', contactId, companyId });
+            setIsQuickAddOpen(true);
+          }}
+        />
       )}
 
       {activeTab === 'deals' && (
-        selectedDeal && selectedAccount && selectedDeal.stage !== DealStage.LEAD ? (
-          <DealWorkspace 
-            deal={selectedDeal} 
-            account={selectedAccount} 
-            interactions={dealInteractions} 
+        selectedDeal && selectedCompany ? (
+          <DealWorkspace
+            deal={selectedDeal}
+            company={selectedCompany}
+            interactions={dealInteractions}
             tasks={dealTasks}
             onBack={() => setSelectedDealId(null)}
             onPrepareCall={() => setIsPrepareCallOpen(true)}
             onCreateOffer={() => alert('Angebotserstellung...')}
           />
         ) : (
-          <DealsList 
-            deals={activePipeline} 
-            accounts={accounts} 
-            onSelectDeal={handleSelectDeal} 
+          <DealsList
+            deals={activePipeline}
+            companies={companies}
+            onSelectDeal={handleSelectDeal}
             searchTerm={searchTerm}
           />
         )
       )}
 
       {activeTab === 'communication' && (
-        <CommunicationHub 
-          mailboxes={mailboxes} 
-          messages={messages} 
-          deals={deals} 
-          accounts={accounts}
+        <CommunicationHub
+          mailboxes={mailboxes}
+          messages={messages}
+          deals={deals}
+          companies={companies}
           onSendMessage={handleSendMessage}
           onAddTask={handleAddTask}
           onUpdateMessageTags={handleUpdateMessageTags}
@@ -208,10 +251,10 @@ const App: React.FC = () => {
       )}
 
       {activeTab === 'tasks' && (
-        <TasksManager 
-          tasks={tasks} 
-          deals={deals} 
-          accounts={accounts} 
+        <TasksManager
+          tasks={tasks}
+          deals={deals}
+          companies={companies}
           onToggleTask={handleToggleTask}
           onSelectDeal={handleSelectDeal}
           onStartPowerHour={() => setIsPowerHourOpen(true)}
@@ -222,30 +265,42 @@ const App: React.FC = () => {
         <div className="p-12 text-center text-slate-500 font-bold uppercase tracking-widest">Settings coming soon...</div>
       )}
 
-      <NewLeadModal 
-        isOpen={isNewLeadModalOpen} 
-        onClose={() => setIsNewLeadModalOpen(false)} 
-        accounts={accounts}
-        onSubmit={handleNewLeadSubmit}
+      <QuickAddModal
+        isOpen={isQuickAddOpen}
+        onClose={() => setIsQuickAddOpen(false)}
+        companies={companies}
+        contacts={contacts}
+        onAddCompany={handleAddCompany}
+        onAddContact={handleAddContact}
+        onAddDeal={handleAddDeal}
+        initialType={quickAddInitialData.type}
+        initialCompanyId={quickAddInitialData.companyId}
+        initialContactId={quickAddInitialData.contactId}
       />
 
-      {isPrepareCallOpen && selectedDeal && selectedAccount && (
-        <PrepareCallModal 
-          isOpen={isPrepareCallOpen} 
-          onClose={() => setIsPrepareCallOpen(false)} 
+      {isPrepareCallOpen && selectedDeal && selectedCompany && (
+        <PrepareCallModal
+          isOpen={isPrepareCallOpen}
+          onClose={() => setIsPrepareCallOpen(false)}
           onGenerate={handlePrepareCallGenerate}
           deal={selectedDeal}
-          account={selectedAccount}
+          company={selectedCompany}
         />
       )}
 
-      <PowerHour 
+      <PowerHour
         isOpen={isPowerHourOpen}
         onClose={() => setIsPowerHourOpen(false)}
         tasks={tasks}
         deals={deals}
-        accounts={accounts}
+        companies={companies}
         onCompleteTask={handleToggleTask}
+      />
+
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImport={handleBatchImport}
       />
     </Layout>
   );

@@ -1,14 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Mail, 
-  Send, 
-  Zap, 
-  Search, 
-  Plus, 
-  Filter, 
-  Star, 
-  Archive, 
+import {
+  Mail,
+  Send,
+  Zap,
+  Search,
+  Plus,
+  Filter,
+  Star,
+  Archive,
   Trash2,
   Clock,
   Inbox,
@@ -28,26 +28,26 @@ import {
   Link as LinkIcon,
   ChevronDown
 } from 'lucide-react';
-import { Mailbox, Message, Deal, Task, TaskType, TaskPriority, Account } from '../types.ts';
+import { Mailbox, Message, Deal, Task, TaskType, TaskPriority, Company } from '../types.ts';
 import { analyzeMessageAI } from '../services/geminiService.ts';
 
 interface CommunicationHubProps {
   mailboxes: Mailbox[];
   messages: Message[];
   deals: Deal[];
-  accounts: Account[];
+  companies: Company[];
   onSendMessage: (mailboxId: string, recipient: string, subject: string, body: string) => void;
   onAddTask: (task: Omit<Task, 'id'>) => void;
   onUpdateMessageTags: (messageId: string, tags: string[]) => void;
   onLinkMessageToDeal: (messageId: string, dealId: string | undefined) => void;
 }
 
-const CommunicationHub: React.FC<CommunicationHubProps> = ({ 
-  mailboxes, 
-  messages, 
-  deals, 
-  accounts, 
-  onSendMessage, 
+const CommunicationHub: React.FC<CommunicationHubProps> = ({
+  mailboxes,
+  messages,
+  deals,
+  companies,
+  onSendMessage,
   onAddTask,
   onUpdateMessageTags,
   onLinkMessageToDeal
@@ -55,7 +55,7 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
   const [selectedMailboxId, setSelectedMailboxId] = useState<string | 'All'>('All');
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(messages[0]?.id || null);
   const [isComposeOpen, setIsComposeOpen] = useState(false);
-  
+
   // AI State
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<{ draftResponse: string; suggestedTasks: any[] } | null>(null);
@@ -76,12 +76,12 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
   const activeMessage = messages.find(m => m.id === selectedMessageId);
   const activeMailbox = mailboxes.find(mb => mb.id === activeMessage?.mailboxId);
   const activeDeal = deals.find(d => d.id === activeMessage?.dealId);
-  const activeAccount = accounts.find(a => a.id === activeDeal?.accountId);
+  const activeCompany = companies.find(c => c.id === activeDeal?.companyId);
 
   const filteredDeals = deals.filter(d => {
-    const acc = accounts.find(a => a.id === d.accountId);
-    return d.name.toLowerCase().includes(dealSearchQuery.toLowerCase()) || 
-           acc?.name.toLowerCase().includes(dealSearchQuery.toLowerCase());
+    const comp = companies.find(c => c.id === d.companyId);
+    return d.title.toLowerCase().includes(dealSearchQuery.toLowerCase()) ||
+      comp?.name.toLowerCase().includes(dealSearchQuery.toLowerCase());
   });
 
   // Trigger AI Analysis when message changes
@@ -103,7 +103,7 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
   const handleAnalyzeMessage = async (msg: Message) => {
     setIsAnalyzing(true);
     try {
-      const result = await analyzeMessageAI(msg, activeDeal, activeAccount);
+      const result = await analyzeMessageAI(msg, activeDeal, activeCompany);
       setAnalysisResult(result);
     } catch (e) {
       console.error("AI Analysis failed", e);
@@ -123,9 +123,9 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
   const handleQuickSend = () => {
     if (!quickReplyText.trim() || !activeMessage) return;
     onSendMessage(
-      activeMessage.mailboxId, 
-      activeMessage.sender, 
-      `Re: ${activeMessage.subject}`, 
+      activeMessage.mailboxId,
+      activeMessage.sender,
+      `Re: ${activeMessage.subject}`,
       quickReplyText
     );
     setQuickReplyText('');
@@ -175,7 +175,7 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
   };
 
   const getMailboxColor = (color: string) => {
-    switch(color) {
+    switch (color) {
       case 'indigo': return 'text-indigo-800 bg-indigo-50';
       case 'amber': return 'text-amber-900 bg-amber-50';
       case 'rose': return 'text-rose-900 bg-rose-50';
@@ -188,7 +188,7 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
       {/* Sidebar - Mailboxes */}
       <aside className="w-64 border-r border-slate-100 flex flex-col shrink-0 bg-slate-50/50">
         <div className="p-6">
-          <button 
+          <button
             onClick={() => {
               setComposeTo('');
               setComposeSubject('');
@@ -202,19 +202,19 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
         </div>
 
         <nav className="flex-1 px-4 space-y-1">
-          <button 
+          <button
             onClick={() => setSelectedMailboxId('All')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${selectedMailboxId === 'All' ? 'bg-white text-indigo-700 shadow-sm border border-slate-100' : 'text-slate-600 hover:bg-white/50'}`}
           >
             <Inbox size={18} /> Unified Inbox
           </button>
-          
+
           <div className="py-4 px-4">
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Postfächer</p>
           </div>
 
           {mailboxes.map(mb => (
-            <button 
+            <button
               key={mb.id}
               onClick={() => setSelectedMailboxId(mb.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${selectedMailboxId === mb.id ? 'bg-white text-indigo-700 shadow-sm border border-slate-100' : 'text-slate-600 hover:bg-white/50'}`}
@@ -226,9 +226,9 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
         </nav>
 
         <div className="p-4 border-t border-slate-100">
-           <button className="w-full py-3 text-slate-600 font-bold text-[10px] uppercase tracking-widest hover:text-slate-900 transition-all flex items-center justify-center gap-2">
-             <Plus size={14} /> Add Mailbox
-           </button>
+          <button className="w-full py-3 text-slate-600 font-bold text-[10px] uppercase tracking-widest hover:text-slate-900 transition-all flex items-center justify-center gap-2">
+            <Plus size={14} /> Add Mailbox
+          </button>
         </div>
       </aside>
 
@@ -237,9 +237,9 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
         <div className="p-6 border-b border-slate-50">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-            <input 
-              type="text" 
-              placeholder="Search messages..." 
+            <input
+              type="text"
+              placeholder="Search messages..."
               className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-slate-400 text-slate-900"
             />
           </div>
@@ -249,7 +249,7 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
           {filteredMessages.map(msg => {
             const mailbox = mailboxes.find(mb => mb.id === msg.mailboxId);
             return (
-              <div 
+              <div
                 key={msg.id}
                 onClick={() => setSelectedMessageId(msg.id)}
                 className={`p-6 cursor-pointer transition-all hover:bg-slate-50 ${selectedMessageId === msg.id ? 'bg-indigo-50/30 border-l-4 border-indigo-600' : ''}`}
@@ -259,19 +259,19 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
                   <span className="text-[9px] font-bold text-slate-500 uppercase">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
                 <h4 className={`text-sm mb-1 truncate ${!msg.isRead ? 'font-black text-slate-900' : 'font-medium text-slate-600'}`}>{msg.subject}</h4>
-                
+
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                   {mailbox && (
-                     <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-md ${getMailboxColor(mailbox.color)}`}>
-                        {mailbox.name}
-                     </span>
-                   )}
-                   {msg.tags && msg.tags.map(t => (
-                     <span key={t} className="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
-                        {t}
-                     </span>
-                   ))}
-                   {msg.dealId && <Zap size={10} className="text-indigo-600" />}
+                  {mailbox && (
+                    <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-md ${getMailboxColor(mailbox.color)}`}>
+                      {mailbox.name}
+                    </span>
+                  )}
+                  {msg.tags && msg.tags.map(t => (
+                    <span key={t} className="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                      {t}
+                    </span>
+                  ))}
+                  {msg.dealId && <Zap size={10} className="text-indigo-600" />}
                 </div>
               </div>
             );
@@ -288,58 +288,58 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
                 <h2 className="text-3xl font-black text-slate-900">New Message.</h2>
                 <button onClick={() => setIsComposeOpen(false)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-all"><Trash2 size={24} /></button>
               </div>
-              
+
               <div className="space-y-4 flex-1 flex flex-col">
                 <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
-                   <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest w-16">From</span>
-                   <select 
-                      value={activeMailboxId}
-                      onChange={(e) => setActiveMailboxId(e.target.value)}
-                      className="flex-1 bg-transparent border-none font-bold text-sm outline-none text-indigo-700"
-                   >
-                     {mailboxes.map(mb => <option key={mb.id} value={mb.id}>{mb.name} ({mb.email})</option>)}
-                   </select>
+                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest w-16">From</span>
+                  <select
+                    value={activeMailboxId}
+                    onChange={(e) => setActiveMailboxId(e.target.value)}
+                    className="flex-1 bg-transparent border-none font-bold text-sm outline-none text-indigo-700"
+                  >
+                    {mailboxes.map(mb => <option key={mb.id} value={mb.id}>{mb.name} ({mb.email})</option>)}
+                  </select>
                 </div>
                 <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
-                   <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest w-16">To</span>
-                   <input 
-                     type="email" 
-                     value={composeTo}
-                     onChange={e => setComposeTo(e.target.value)}
-                     className="flex-1 bg-transparent border-none font-bold text-sm outline-none text-slate-900 placeholder:text-slate-400" 
-                     placeholder="recipient@example.com"
-                   />
+                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest w-16">To</span>
+                  <input
+                    type="email"
+                    value={composeTo}
+                    onChange={e => setComposeTo(e.target.value)}
+                    className="flex-1 bg-transparent border-none font-bold text-sm outline-none text-slate-900 placeholder:text-slate-400"
+                    placeholder="recipient@example.com"
+                  />
                 </div>
                 <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
-                   <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest w-16">Subject</span>
-                   <input 
-                     type="text" 
-                     value={composeSubject}
-                     onChange={e => setComposeSubject(e.target.value)}
-                     className="flex-1 bg-transparent border-none font-bold text-sm outline-none text-slate-900 placeholder:text-slate-400" 
-                     placeholder="Betreff..."
-                   />
+                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest w-16">Subject</span>
+                  <input
+                    type="text"
+                    value={composeSubject}
+                    onChange={e => setComposeSubject(e.target.value)}
+                    className="flex-1 bg-transparent border-none font-bold text-sm outline-none text-slate-900 placeholder:text-slate-400"
+                    placeholder="Betreff..."
+                  />
                 </div>
-                
+
                 <div className="flex-1 pt-6 relative">
-                   <textarea 
-                     className="w-full h-full bg-transparent border-none resize-none font-medium text-slate-800 outline-none leading-relaxed placeholder:text-slate-400"
-                     placeholder="Schreibe deine Nachricht..."
-                     value={composeBody}
-                     onChange={e => setComposeBody(e.target.value)}
-                   ></textarea>
-                   
-                   <div className="absolute right-0 bottom-6 flex gap-3">
-                     <button 
-                       onClick={() => {
-                         onSendMessage(activeMailboxId, composeTo, composeSubject, composeBody);
-                         setIsComposeOpen(false);
-                       }}
-                       className="px-10 py-4 bg-slate-900 text-white font-black rounded-2xl flex items-center gap-2 hover:bg-slate-800 transition-all shadow-xl"
-                     >
-                       <Send size={18} /> Send
-                     </button>
-                   </div>
+                  <textarea
+                    className="w-full h-full bg-transparent border-none resize-none font-medium text-slate-800 outline-none leading-relaxed placeholder:text-slate-400"
+                    placeholder="Schreibe deine Nachricht..."
+                    value={composeBody}
+                    onChange={e => setComposeBody(e.target.value)}
+                  ></textarea>
+
+                  <div className="absolute right-0 bottom-6 flex gap-3">
+                    <button
+                      onClick={() => {
+                        onSendMessage(activeMailboxId, composeTo, composeSubject, composeBody);
+                        setIsComposeOpen(false);
+                      }}
+                      className="px-10 py-4 bg-slate-900 text-white font-black rounded-2xl flex items-center gap-2 hover:bg-slate-800 transition-all shadow-xl"
+                    >
+                      <Send size={18} /> Send
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -363,60 +363,60 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
                   <div className="flex items-center gap-2">
                     {/* Link Deal Context Button */}
                     <div className="relative">
-                      <button 
+                      <button
                         onClick={() => setIsLinkDealOpen(!isLinkDealOpen)}
                         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeDeal ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                       >
-                        <LinkIcon size={14} /> 
-                        {activeDeal ? activeDeal.name : 'Link Context'}
+                        <LinkIcon size={14} />
+                        {activeDeal ? activeDeal.title : 'Link Context'}
                         <ChevronDown size={14} className={isLinkDealOpen ? 'rotate-180' : ''} />
                       </button>
 
                       {isLinkDealOpen && (
                         <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
-                           <div className="p-4 border-b border-slate-100 bg-slate-50">
-                              <div className="relative">
-                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                                <input 
-                                  type="text"
-                                  autoFocus
-                                  placeholder="Search deals or accounts..."
-                                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900"
-                                  value={dealSearchQuery}
-                                  onChange={e => setDealSearchQuery(e.target.value)}
-                                />
-                              </div>
-                           </div>
-                           <div className="max-h-60 overflow-y-auto">
-                              {activeDeal && (
-                                <button 
-                                  onClick={unlinkDeal}
-                                  className="w-full text-left px-5 py-3 hover:bg-rose-50 text-rose-700 text-xs font-black uppercase tracking-widest flex items-center gap-2 border-b border-slate-50"
+                          <div className="p-4 border-b border-slate-100 bg-slate-50">
+                            <div className="relative">
+                              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                              <input
+                                type="text"
+                                autoFocus
+                                placeholder="Search deals or companies..."
+                                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900"
+                                value={dealSearchQuery}
+                                onChange={e => setDealSearchQuery(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <div className="max-h-60 overflow-y-auto">
+                            {activeDeal && (
+                              <button
+                                onClick={unlinkDeal}
+                                className="w-full text-left px-5 py-3 hover:bg-rose-50 text-rose-700 text-xs font-black uppercase tracking-widest flex items-center gap-2 border-b border-slate-50"
+                              >
+                                <X size={14} /> Unlink Current
+                              </button>
+                            )}
+                            {filteredDeals.map(d => {
+                              const comp = companies.find(c => c.id === d.companyId);
+                              return (
+                                <button
+                                  key={d.id}
+                                  onClick={() => linkDeal(d.id)}
+                                  className="w-full text-left px-5 py-4 hover:bg-indigo-50 transition-colors border-b border-slate-50 last:border-0"
                                 >
-                                   <X size={14} /> Unlink Current
+                                  <p className="text-xs font-black text-slate-900 truncate">{d.title}</p>
+                                  <p className="text-[10px] font-bold text-slate-500 uppercase mt-0.5">{comp?.name}</p>
                                 </button>
-                              )}
-                              {filteredDeals.map(d => {
-                                const acc = accounts.find(a => a.id === d.accountId);
-                                return (
-                                  <button 
-                                    key={d.id}
-                                    onClick={() => linkDeal(d.id)}
-                                    className="w-full text-left px-5 py-4 hover:bg-indigo-50 transition-colors border-b border-slate-50 last:border-0"
-                                  >
-                                    <p className="text-xs font-black text-slate-900 truncate">{d.name}</p>
-                                    <p className="text-[10px] font-bold text-slate-500 uppercase mt-0.5">{acc?.name}</p>
-                                  </button>
-                                );
-                              })}
-                              {filteredDeals.length === 0 && (
-                                <div className="p-8 text-center text-slate-500 text-[10px] font-black uppercase tracking-widest">No deals found</div>
-                              )}
-                           </div>
+                              );
+                            })}
+                            {filteredDeals.length === 0 && (
+                              <div className="p-8 text-center text-slate-500 text-[10px] font-black uppercase tracking-widest">No deals found</div>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
-                    
+
                     <button className="p-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-all"><Star size={20} /></button>
                     <button className="p-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-all"><Trash2 size={20} /></button>
                     <button className="p-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-all"><MoreVertical size={20} /></button>
@@ -437,9 +437,9 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
                     </span>
                   ))}
                   <form onSubmit={handleAddTag} className="flex items-center ml-2">
-                    <input 
-                      type="text" 
-                      placeholder="Add tag..." 
+                    <input
+                      type="text"
+                      placeholder="Add tag..."
                       className="text-[11px] font-bold bg-slate-50 border border-dashed border-slate-200 rounded-xl px-3 py-1.5 outline-none focus:border-indigo-500 focus:bg-white transition-all text-slate-900 w-24 placeholder:text-slate-400"
                       value={newTagInput}
                       onChange={e => setNewTagInput(e.target.value)}
@@ -447,7 +447,7 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
                   </form>
                 </div>
               </header>
-              
+
               <div className="flex-1 p-10 overflow-y-auto">
                 <div className="max-w-3xl space-y-8">
                   <p className="text-slate-800 leading-relaxed font-medium text-lg whitespace-pre-wrap">
@@ -458,17 +458,17 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
 
               <footer className="p-8 bg-slate-50/50 border-t border-slate-100">
                 <div className="bg-white p-4 rounded-[2.5rem] border border-slate-200 shadow-sm focus-within:shadow-xl focus-within:border-indigo-200 transition-all flex items-center gap-4">
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder={isAnalyzing ? "Analysiere Nachricht..." : "Schnelle Antwort schreiben..."}
                     value={quickReplyText}
                     onChange={e => setQuickReplyText(e.target.value)}
                     className="flex-1 px-4 py-3 bg-transparent border-none outline-none font-bold text-sm text-slate-900 placeholder:text-slate-400"
                   />
                   {isAnalyzing ? (
-                     <Loader2 size={20} className="animate-spin text-indigo-600 mx-2" />
+                    <Loader2 size={20} className="animate-spin text-indigo-600 mx-2" />
                   ) : (
-                    <button 
+                    <button
                       onClick={handleQuickSend}
                       disabled={!quickReplyText.trim()}
                       className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl hover:bg-indigo-600 hover:text-white transition-all disabled:opacity-30"
@@ -476,11 +476,11 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
                       <Send size={20} fill="currentColor" />
                     </button>
                   )}
-                  <button 
+                  <button
                     onClick={useAIDraftInFullEditor}
                     className="px-6 py-3 bg-slate-900 text-white font-black rounded-2xl flex items-center gap-2 text-xs uppercase tracking-widest shadow-lg"
                   >
-                     Full Editor <ArrowLeft size={16} className="rotate-180" />
+                    Full Editor <ArrowLeft size={16} className="rotate-180" />
                   </button>
                 </div>
               </footer>
@@ -507,8 +507,8 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
 
             {isAnalyzing ? (
               <div className="flex-1 flex flex-col items-center justify-center space-y-4 opacity-50">
-                 <Loader2 size={32} className="animate-spin text-indigo-600" />
-                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Scanning content...</p>
+                <Loader2 size={32} className="animate-spin text-indigo-600" />
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Scanning content...</p>
               </div>
             ) : analysisResult ? (
               <div className="space-y-10 animate-in fade-in slide-in-from-right-4">
@@ -530,15 +530,15 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
                     {analysisResult.suggestedTasks.map((st, i) => (
                       <div key={i} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm group hover:border-indigo-600 transition-all">
                         <div className="flex justify-between items-start mb-2">
-                           <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${st.priority === 'P0' ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-700 font-black border border-slate-200'}`}>
-                             {st.priority}
-                           </span>
-                           <button 
-                             onClick={() => convertToTask(st)}
-                             className="text-slate-500 hover:text-indigo-600 transition-colors"
-                           >
-                             <PlusCircle size={18} />
-                           </button>
+                          <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${st.priority === 'P0' ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-700 font-black border border-slate-200'}`}>
+                            {st.priority}
+                          </span>
+                          <button
+                            onClick={() => convertToTask(st)}
+                            className="text-slate-500 hover:text-indigo-600 transition-colors"
+                          >
+                            <PlusCircle size={18} />
+                          </button>
                         </div>
                         <p className="text-[11px] font-black text-slate-900 leading-tight mb-2">{st.title}</p>
                         <div className="flex items-center gap-2 text-[9px] font-bold text-slate-600 uppercase">
@@ -552,14 +552,14 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
                 <div className="pt-6 border-t border-slate-200">
                   <div className="flex items-center gap-2 text-[9px] font-black text-emerald-700 uppercase">
                     <CheckCircle2 size={12} />
-                    Context Linked: {activeAccount?.name || 'Global'}
+                    Context Linked: {activeCompany?.name || 'Global'}
                   </div>
                 </div>
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 opacity-30">
-                 <Zap size={32} className="text-slate-600" />
-                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">No Intelligence available</p>
+                <Zap size={32} className="text-slate-600" />
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">No Intelligence available</p>
               </div>
             )}
           </aside>
@@ -570,3 +570,4 @@ const CommunicationHub: React.FC<CommunicationHubProps> = ({
 };
 
 export default CommunicationHub;
+

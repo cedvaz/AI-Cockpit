@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { 
-  Flame, 
-  Calendar, 
-  FileText, 
-  AlertTriangle, 
-  ArrowUpRight, 
+import {
+  Flame,
+  Calendar,
+  FileText,
+  AlertTriangle,
+  ArrowUpRight,
   Zap,
   Target,
   TrendingUp,
@@ -41,15 +41,15 @@ const Dashboard: React.FC<DashboardProps> = ({ hotLeads, upcomingCalls, openOffe
         </div>
 
         <div className="relative z-10 flex gap-8">
-           <div className="text-center space-y-2">
-             <div className="text-5xl font-black text-white">{currentTotal}</div>
-             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Total 2024</div>
-           </div>
-           <div className="w-px h-16 bg-white/10 my-auto"></div>
-           <div className="text-center space-y-2">
-             <div className="text-5xl font-black text-indigo-500">{Math.round((currentTotal/annualGoal)*100)}%</div>
-             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Goal Reach</div>
-           </div>
+          <div className="text-center space-y-2">
+            <div className="text-5xl font-black text-white">{currentTotal}</div>
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Total 2024</div>
+          </div>
+          <div className="w-px h-16 bg-white/10 my-auto"></div>
+          <div className="text-center space-y-2">
+            <div className="text-5xl font-black text-indigo-500">{Math.round((currentTotal / annualGoal) * 100)}%</div>
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Goal Reach</div>
+          </div>
         </div>
 
         {/* Decorative background element */}
@@ -73,7 +73,7 @@ const Dashboard: React.FC<DashboardProps> = ({ hotLeads, upcomingCalls, openOffe
           <div className="space-y-3">
             {hotLeads.slice(0, 3).map(lead => (
               <div key={lead.id} onClick={() => onSelectDeal(lead.id)} className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 cursor-pointer transition-all border border-transparent hover:border-slate-100">
-                <span className="text-sm font-semibold text-slate-700 truncate mr-2">{lead.name}</span>
+                <span className="text-sm font-semibold text-slate-700 truncate mr-2">{lead.title}</span>
                 <span className="bg-orange-50 text-orange-600 px-2 py-0.5 rounded-lg text-[10px] font-black">{lead.score}</span>
               </div>
             ))}
@@ -98,7 +98,7 @@ const Dashboard: React.FC<DashboardProps> = ({ hotLeads, upcomingCalls, openOffe
                 <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-black shrink-0">
                   {new Date(call.nextStepDate).getDate()}
                 </div>
-                <span className="text-sm font-semibold text-slate-700 truncate">{call.name}</span>
+                <span className="text-sm font-semibold text-slate-700 truncate">{call.title}</span>
               </div>
             ))}
           </div>
@@ -119,8 +119,8 @@ const Dashboard: React.FC<DashboardProps> = ({ hotLeads, upcomingCalls, openOffe
           <div className="space-y-3">
             {openOffers.slice(0, 3).map(offer => (
               <div key={offer.id} onClick={() => onSelectDeal(offer.id)} className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 cursor-pointer transition-all border border-transparent hover:border-slate-100">
-                <span className="text-sm font-semibold text-slate-700 truncate">{offer.name}</span>
-                <span className="text-emerald-600 font-black text-[10px]">€{offer.value ? offer.value/1000 : 0}k</span>
+                <span className="text-sm font-semibold text-slate-700 truncate">{offer.title}</span>
+                <span className="text-emerald-600 font-black text-[10px]">€{offer.value ? offer.value / 1000 : 0}k</span>
               </div>
             ))}
           </div>
@@ -174,7 +174,7 @@ const Dashboard: React.FC<DashboardProps> = ({ hotLeads, upcomingCalls, openOffe
                     <tr key={deal.id} className="hover:bg-slate-50 transition-all group">
                       <td className="px-8 py-6">
                         <div>
-                          <p className="text-base font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{deal.name}</p>
+                          <p className="text-base font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{deal.title}</p>
                           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Acme Corp • {deal.tags[0]}</p>
                         </div>
                       </td>
@@ -187,7 +187,7 @@ const Dashboard: React.FC<DashboardProps> = ({ hotLeads, upcomingCalls, openOffe
                         <p className="text-base font-black text-slate-900">€{deal.value?.toLocaleString()}</p>
                       </td>
                       <td className="px-8 py-6 text-right">
-                        <button 
+                        <button
                           onClick={() => onSelectDeal(deal.id)}
                           className="p-3 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all"
                         >
@@ -203,41 +203,41 @@ const Dashboard: React.FC<DashboardProps> = ({ hotLeads, upcomingCalls, openOffe
         </div>
 
         <div className="space-y-8">
-           <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group">
-             <div className="relative z-10 space-y-6">
-               <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                 <Zap size={24} fill="white" />
-               </div>
-               <div>
-                 <h3 className="text-2xl font-black mb-2">Magic Outreach</h3>
-                 <p className="text-indigo-100/70 text-sm leading-relaxed">Wähle einen Deal und lass die KI die perfekte personalisierte Nachricht schreiben.</p>
-               </div>
-               <button className="w-full bg-white text-indigo-600 font-black py-4 rounded-[1.5rem] shadow-xl hover:bg-indigo-50 transition-all flex items-center justify-center gap-2">
-                 Generate Outreach
-               </button>
-             </div>
-             <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-white/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-           </div>
+          <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group">
+            <div className="relative z-10 space-y-6">
+              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                <Zap size={24} fill="white" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black mb-2">Magic Outreach</h3>
+                <p className="text-indigo-100/70 text-sm leading-relaxed">Wähle einen Deal und lass die KI die perfekte personalisierte Nachricht schreiben.</p>
+              </div>
+              <button className="w-full bg-white text-indigo-600 font-black py-4 rounded-[1.5rem] shadow-xl hover:bg-indigo-50 transition-all flex items-center justify-center gap-2">
+                Generate Outreach
+              </button>
+            </div>
+            <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-white/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+          </div>
 
-           <div className="bg-white rounded-[2.5rem] border border-slate-200 p-8">
-             <h3 className="text-lg font-black text-slate-900 mb-6 uppercase tracking-widest">Market Status</h3>
-             <div className="space-y-6">
-               <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-black">AI</div>
-                  <div className="flex-1">
-                    <p className="text-sm font-black text-slate-900">LLM Efficiency Trend</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">+12.4% this week</p>
-                  </div>
-               </div>
-               <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-black">€</div>
-                  <div className="flex-1">
-                    <p className="text-sm font-black text-slate-900">Audit Market Size</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">High Demand</p>
-                  </div>
-               </div>
-             </div>
-           </div>
+          <div className="bg-white rounded-[2.5rem] border border-slate-200 p-8">
+            <h3 className="text-lg font-black text-slate-900 mb-6 uppercase tracking-widest">Market Status</h3>
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-black">AI</div>
+                <div className="flex-1">
+                  <p className="text-sm font-black text-slate-900">LLM Efficiency Trend</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">+12.4% this week</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-black">€</div>
+                <div className="flex-1">
+                  <p className="text-sm font-black text-slate-900">Audit Market Size</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">High Demand</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -245,3 +245,4 @@ const Dashboard: React.FC<DashboardProps> = ({ hotLeads, upcomingCalls, openOffe
 };
 
 export default Dashboard;
+

@@ -1,33 +1,50 @@
 
 import React, { useState } from 'react';
-import { 
-  LayoutDashboard, 
-  Briefcase, 
-  Search, 
-  Settings, 
-  PlusCircle, 
-  Bell, 
+import {
+  LayoutDashboard,
+  Briefcase,
+  Search,
+  Settings,
+  PlusCircle,
+  Bell,
   LogOut,
   Users,
   CheckSquare,
-  MessageCircle
+  MessageCircle,
+  Building2,
+  Zap,
+  Command,
+  Database
 } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
   onSearch: (term: string) => void;
-  onNewLead: () => void;
-  activeTab: 'dashboard' | 'leads' | 'deals' | 'tasks' | 'communication' | 'settings';
-  setActiveTab: (tab: 'dashboard' | 'leads' | 'deals' | 'tasks' | 'communication' | 'settings') => void;
+  onQuickAdd: () => void;
+  onImport: () => void;
+  activeTab: 'dashboard' | 'companies' | 'contacts' | 'deals' | 'tasks' | 'communication' | 'settings';
+  setActiveTab: (tab: 'dashboard' | 'companies' | 'contacts' | 'deals' | 'tasks' | 'communication' | 'settings') => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, onSearch, onNewLead, activeTab, setActiveTab }) => {
+const Layout: React.FC<LayoutProps> = ({ children, onSearch, onQuickAdd, onImport, activeTab, setActiveTab }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     onSearch(e.target.value);
   };
+
+  // Global keyboard shortcut for Quick Add
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        onQuickAdd();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onQuickAdd]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
@@ -43,63 +60,83 @@ const Layout: React.FC<LayoutProps> = ({ children, onSearch, onNewLead, activeTa
         </div>
 
         <nav className="flex-1 mt-4 px-3 space-y-1">
-          <button 
+          <button
             onClick={() => setActiveTab('dashboard')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'dashboard' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
           >
             <LayoutDashboard size={20} />
             <span className="font-medium">Dashboard</span>
           </button>
-          
-          <button 
-             onClick={() => setActiveTab('leads')}
-             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'leads' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+
+          <div className="pt-4 pb-2 px-4">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">CRM</p>
+          </div>
+
+          <button
+            onClick={() => setActiveTab('companies')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'companies' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+          >
+            <Building2 size={20} />
+            <span className="font-medium">Firmen</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('contacts')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'contacts' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
           >
             <Users size={20} />
-            <div className="flex-1 flex justify-between items-center">
-              <span className="font-medium">Leads</span>
-              <span className="bg-indigo-600 text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase">Hot</span>
-            </div>
+            <span className="font-medium">Kontakte</span>
           </button>
 
-          <button 
-             onClick={() => setActiveTab('deals')}
-             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'deals' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+          <button
+            onClick={() => setActiveTab('deals')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'deals' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
           >
             <Briefcase size={20} />
-            <span className="font-medium">Pipeline</span>
+            <span className="font-medium">Pipeline (Deals)</span>
           </button>
 
-          <button 
-             onClick={() => setActiveTab('communication')}
-             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'communication' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+          <button
+            onClick={() => setActiveTab('communication')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'communication' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
           >
             <MessageCircle size={20} />
             <span className="font-medium">Communication</span>
           </button>
 
-          <button 
-             onClick={() => setActiveTab('tasks')}
-             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'tasks' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+          <button
+            onClick={() => setActiveTab('tasks')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'tasks' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
           >
             <CheckSquare size={20} />
             <span className="font-medium">Tasks</span>
           </button>
 
-          <button 
-            onClick={onNewLead}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-400 hover:text-white hover:bg-emerald-500/10 transition-all"
+          <button
+            onClick={onImport}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-400 hover:text-white hover:bg-indigo-500/10 transition-all mt-4"
           >
-            <PlusCircle size={20} />
-            <span className="font-medium">New Lead</span>
+            <Database size={20} />
+            <span className="font-medium">Batch Import</span>
           </button>
-          
+
+          <button
+            onClick={onQuickAdd}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-400 hover:text-white hover:bg-emerald-500/10 transition-all mt-1"
+          >
+            <Zap size={20} />
+            <div className="flex-1 flex justify-between items-center">
+              <span className="font-medium">Quick Add</span>
+              <span className="text-[10px] text-slate-500 flex items-center gap-0.5"><Command size={10} />K</span>
+            </div>
+          </button>
+
           <div className="pt-8 pb-2 px-4">
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">System</p>
           </div>
-          <button 
-             onClick={() => setActiveTab('settings')}
-             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'settings' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'settings' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
           >
             <Settings size={20} />
             <span className="font-medium">Settings</span>
@@ -122,9 +159,9 @@ const Layout: React.FC<LayoutProps> = ({ children, onSearch, onNewLead, activeTa
         <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10 sticky top-0 z-20">
           <div className="relative w-full max-w-xl group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
-            <input 
-              type="text" 
-              placeholder="Magic Search (Leads, Deals, Docs...)" 
+            <input
+              type="text"
+              placeholder="Magic Search (Firmen, Kontakte, Deals...)"
               value={searchTerm}
               onChange={handleSearchChange}
               className="w-full pl-12 pr-6 py-3 bg-slate-100 border-none rounded-2xl text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:bg-white outline-none transition-all"
@@ -156,3 +193,4 @@ const Layout: React.FC<LayoutProps> = ({ children, onSearch, onNewLead, activeTa
 };
 
 export default Layout;
+
