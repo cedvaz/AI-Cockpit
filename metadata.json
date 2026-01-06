@@ -1,0 +1,8 @@
+{
+  "name": "Cedric KI Ops Cockpit",
+  "description": "A high-performance AI operations cockpit for Sales and Delivery, featuring 1-click call preparation, offer creation, and a centralized deal workspace.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
